@@ -29,13 +29,12 @@ def main(coords=None, pattern=None, depthshade=True):
     #fig, ax = plt.subplots(subplot_kw={'projection':'3d'}, figsize=(10, 8), dpi=120)
     fig, ax = plt.subplots(subplot_kw={'projection':'3d'})
     pattern /= 255
-    #pattern2 = pd.DataFrame(index=pattern.index, columns=range(len(pattern.columns) // 3))
-    #for j in pattern2.columns:
-    #    pattern2[j] = pattern[[f'R_{j}', f'G_{j}', f'B_{j}']].apply(lambda x: tuple(x), axis=1)
-    #pattern2 = pd.DataFrame({j: pattern[[f'R_{j}', f'G_{j}', f'B_{j}']].apply(tuple, axis=1).squeeze() for j in range(len(pattern.columns) // 3)})
-    pattern2 = pd.DataFrame({j: pattern[[f'R_{j}', f'G_{j}', f'B_{j}']].to_records(index=False).tolist() for j in range(len(pattern.columns) // 3)})
+    #import time
+    #ptime = time.thread_time()
+    #pattern2 = pd.DataFrame({j: pattern[[f'R_{j}', f'G_{j}', f'B_{j}']].to_records(index=False).tolist() for j in range(len(pattern.columns) // 3)})
+    pattern2 = pd.DataFrame(pattern[[f'R_{j}', f'G_{j}', f'B_{j}']].to_records(index=False).tolist() for j in range(len(pattern.columns) // 3)).T
+    #print(time.thread_time() - ptime)
     # create a list of points for all the coords
-    #lines = [ax.plot(coords['x'][i], coords['y'][i], coords['z'][i], '.')[0] for i in coords.index]
     line = ax.scatter3D(coords['x'], coords['y'], coords['z'], '.', facecolor=pattern2.loc[0, :], edgecolor=None, depthshade=depthshade)
 
     size = coords['z'].max() - coords['z'].min()
@@ -50,13 +49,10 @@ def main(coords=None, pattern=None, depthshade=True):
     # this function pushes the colors to the next frame
     def animate_t():
         i = persistant['i']
-        #print(i)
-        # change all the colors in a loop
-        #for line, color in zip(lines, pattern2.loc[i, :]):
-        ##for j, line in enumerate(lines):
-        ##    color = (pattern[f'R_{j}'][i], pattern[f'G_{j}'][i], pattern[f'B_{j}'][i])
-        #    line.set_color(color)
+        print(i)
+        # change all the colors
         line.set_color(pattern2.loc[i, :])
+        #if not i % 2:
         fig.canvas.draw_idle()
         persistant['i'] = i + 1 if i + 1 < pattern.shape[0] else 0
         return persistant['i']
